@@ -66,7 +66,9 @@ class Chatbot:
                     if id.lower() == user_input.lower():
                         modelo = cells[1].get_text().strip()
                         sistema = cells[2].get_text().strip()
-                        return f"id: {id}, modelo: {modelo}, sistema: {sistema}"
+                        idade = cells[8].get_text().strip()
+                        genero = cells[9].get_text().strip()
+                        return f"modelo do celular: {modelo}, sistema operacional: {sistema}, idade do usuário: {idade}, genero do usuário: {genero}"
                 return "Usuário não encontrado. Por favor, verifique o id e tente novamente."
             else:
                 return "Desculpe, não consegui acessar a tabela no momento."
