@@ -1,20 +1,24 @@
 ################ SEGUNGA VERSÃO MAIS AVANÇADA, RECONHECIMENTO SEM DICIONÁRIO PARA COLUNAS
 ################ ATIVIDADE: ADICIONAR CHAMADA DA API OU TABELA, E RANDOMIZAÇÃO DAS FRASES DE RESPOSTA.
+import random
 import customtkinter as ctk
 import spacy
 from difflib import SequenceMatcher
 import requests
 from collections import defaultdict
 import csv
+import pt_core_news_sm
 
 # Carregar o modelo de português
 nlp = spacy.load('pt_core_news_sm')
+nlp = pt_core_news_sm.load()
 
 class Chatbot:
     def __init__(self, master):
         self.master = master
         master.title("Artemis")
         master.geometry("600x500")
+        master.iconbitmap("favicon.ico")
 
         # Configuração da janela
         master.grid_columnconfigure(0, weight=1)
@@ -94,9 +98,13 @@ class Chatbot:
         if any(greeting in tokens for greeting in ["olá", "oi"]):
             return "Olá! Em que posso ajudar?"
         elif any(farewell in tokens for farewell in ["tchau", "adeus", "até logo"]):
-            return "Até mais! Se precisar de algo, estou aqui."
-        elif "ajuda" in tokens or "socorro" in tokens:
-            return "Claro! Estou aqui para ajudar. O que você precisa?"
+            adeus = [
+                "Até mais! Se precisar de algo, estou aqui.",
+                "Adeus até a proxima!"
+            ]
+            return random.choices[adeus]
+        elif any(helps in tokens for helps in ["ajuda", "socorro"]):
+            return "Claro vou lhe ajuda!"
         else:
             return "Desculpe, não entendi. Poderia reformular a pergunta?"
 
