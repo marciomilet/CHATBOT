@@ -1,17 +1,13 @@
-################ SEGUNGA VERSÃO MAIS AVANÇADA, RECONHECIMENTO SEM DICIONÁRIO PARA COLUNAS
-################ ATIVIDADE: ADICIONAR CHAMADA DA API OU TABELA, E RANDOMIZAÇÃO DAS FRASES DE RESPOSTA.
-import random
 import customtkinter as ctk
 import spacy
 from difflib import SequenceMatcher
 import requests
 from collections import defaultdict
 import csv
-import pt_core_news_sm
+import random
 
 # Carregar o modelo de português
 nlp = spacy.load('pt_core_news_sm')
-nlp = pt_core_news_sm.load()
 
 class Chatbot:
     def __init__(self, master):
@@ -19,6 +15,7 @@ class Chatbot:
         master.title("Artemis")
         master.geometry("600x500")
         master.iconbitmap("favicon.ico")
+
 
         # Configuração da janela
         master.grid_columnconfigure(0, weight=1)
@@ -32,7 +29,7 @@ class Chatbot:
         # Área de texto
         self.text_area = ctk.CTkTextbox(master, width=500, height=300, wrap="word")
         self.text_area.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
-        self.text_area.insert(ctk.END, "Olá! Eu sou a Artemis, sua assistente virtual. Como posso te ajudar hoje?\n")
+        self.text_area.insert(ctk.END, "Olá! Eu sou a Artemis, sua assistente virtual. Como posso te ajudar hoje?\n\n")
         self.text_area.configure(state="disabled")
 
         # Campo de entrada
@@ -44,7 +41,6 @@ class Chatbot:
         self.send_button = ctk.CTkButton(master, text="Enviar", fg_color="blue", command=self.process_input)
         self.send_button.grid(row=2, column=0, padx=20, pady=10)
 
-        # Dados da tabela
         self.url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQIVaHcTlB62Tj29WEEhYXGAFx1mhwxstWtMAcvnsUemD_acuLrooLn3MC-T2KOGYexC_ctIPsKZPVx/pub?output=csv&gid=2900213"
         self.response = requests.get(self.url)
         self.response.raise_for_status()
@@ -55,16 +51,17 @@ class Chatbot:
                 self.data_dict[key].append(value)
         self.data_dict = dict(self.data_dict)
 
+
     def process_input(self, event=None):
         user_input = self.entry.get()
         if not user_input:
             return
 
         self.text_area.configure(state="normal")
-        self.text_area.insert(ctk.END, "Você: " + user_input + "\n")
+        self.text_area.insert(ctk.END, "Você: " + user_input + "\n\n")
 
         response = self.get_bot_response(user_input)
-        self.text_area.insert(ctk.END, "Artemis: " + response + "\n")
+        self.text_area.insert(ctk.END, "Artemis: " + response + "\n\n")
 
         self.text_area.configure(state="disabled")
 
@@ -78,11 +75,14 @@ class Chatbot:
 
         # Tentar encontrar uma correspondência com as colunas
         for column in self.data_dict.keys():
+           
             # Lematizar o nome da coluna
             column_lemma = nlp(column)[0].lemma_
+        
             # Verificar se a coluna está nos tokens
             if column_lemma in tokens:
                 column_data = self.data_dict[column]
+               
                 response = f"Os dados da coluna '{column}' são: {', '.join(map(str, column_data))}."
                 return response
             else:
@@ -92,19 +92,50 @@ class Chatbot:
                     if similarity > 0.8:
                         column_data = self.data_dict[column]
                         response = f"Os dados da coluna '{column}' são: {', '.join(map(str, column_data))}."
-                        return response
+                        return response 
+                            
+        
 
         # Respostas simples baseadas em palavras-chave
-        if any(greeting in tokens for greeting in ["olá", "oi"]):
-            return "Olá! Em que posso ajudar?"
-        elif any(farewell in tokens for farewell in ["tchau", "adeus", "até logo"]):
-            adeus = [
-                "Até mais! Se precisar de algo, estou aqui.",
-                "Adeus até a proxima!"
+        if any(greeting in tokens for greeting in ["ola", "oi"]):
+            hello = [
+        "Olá! Como posso te ajudar?",
+        "Oi! Tudo bem por aí?",
+        "Saudações! O que você precisa?",
+        "Oiê! Precisa de algo?",
+        "Fala aí! Estou aqui para ajudar."
             ]
-            return random.choices[adeus]
-        elif any(helps in tokens for helps in ["ajuda", "socorro"]):
-            return "Claro vou lhe ajuda!"
+            return random.choice(hello)
+        elif any(farewell in tokens for farewell in ["tchau", "adeus", "até logo"]):
+            goodbye = [
+        "Tchau! Até mais!",
+        "Adeus! Foi bom falar com você!",
+        "Até logo! Cuide-se!",
+        "Nos vemos em breve!",
+        "Até mais! Qualquer coisa, estou por aqui.",
+        "Falou! Até a próxima!",
+        "Valeu, tchau!",
+        "Fique bem! Até logo!",
+        "Foi ótimo falar com você, até mais!",
+        "Adeus! Espero te ver em breve!"
+        ]
+            return random.choice(goodbye)
+        
+        elif any(helps in tokens for helps in ["auxilio", "assistencia", "amparo", "ajuda", "socorro"]):
+            support = [
+        "Claro! Estou aqui para ajudar.",
+        "Como posso te auxiliar?",
+        "Conte comigo! O que você precisa?",
+        "Estou aqui para te dar suporte. O que está precisando?",
+        "Com certeza! Me diga como posso ajudar.",
+        "Sem problemas, estou pronto para te apoiar.",
+        "Pode falar, estou aqui para contribuir!",
+        "Diga aí! Como posso colaborar?",
+        "Não se preocupe, vamos resolver isso juntos.",
+        "Pronto para ajudar! É só perguntar."
+        ]
+            return random.choice(support)
+    
         else:
             return "Desculpe, não entendi. Poderia reformular a pergunta?"
 
